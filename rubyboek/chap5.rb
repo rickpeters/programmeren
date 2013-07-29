@@ -12,4 +12,3 @@ getal = gets.chomp.to_i
 mooigetal = getal + 1
 puts 'je hebt me het getal ' + getal.to_s + ' gegeven, ik vind ' + mooigetal.to_s + ' eigenlijk mooier :)'
 puts
-
