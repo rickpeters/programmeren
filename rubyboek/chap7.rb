@@ -7,11 +7,13 @@ puts 'Hallo, wat is je naam?'
 naam = gets.chomp
 puts 'Hallo, ' + naam + '.'
 
-if naam == 'Rick'
+if naam == 'Rick' || naam == 'Leikur'
   puts 'Wat een mooie naam!'
+elsif naam == 'Hermien'
+  puts 'jeetje, dat is ook een leuke naam!'
 else
   puts 'Oh jee, jouw ouders hebben hier ook niet echt over nagedacht :-)'
-end
+end  # branching sample
 
 input = ''
 
@@ -21,3 +23,5 @@ while input != 'doei'
 end
 
 puts 'tot binnenkort!'
+
+puts self
