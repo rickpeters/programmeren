@@ -10,11 +10,12 @@ puts 'say_moo returned:'
 puts return_val
 
 
-def ask question
-  while (true)
+# @param [string] question
+def ask(question)
+  while true
     puts question
     reply = gets.chomp.downcase
-    if (reply == 'ja' or reply == 'nee')
+    if (reply == 'ja' or reply == 'nee') then
       if reply == 'ja'
         return true
       else
