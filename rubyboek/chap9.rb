@@ -11,16 +11,14 @@ puts return_val
 
 
 def ask question
-  good_answer = false
-  while (not good_answer)
+  while (true)
     puts question
     reply = gets.chomp.downcase
     if (reply == 'ja' or reply == 'nee')
-      good_answer = true
       if reply == 'ja'
-        answer = true
+        return true
       else
-        answer = false
+        return false
       end
     else
       puts 'antwoord alsjeblieft met "ja" of "nee"'
