@@ -23,7 +23,7 @@ def recursive_sort unsorted_array, sorted_array
       # we zitten nog goed, huidige woord kan naar new_unsorted_array
       new_unsorted_array.push unsorted_array[i]
     else
-      # kleinste woord kan naar new_ubsorted_array, en we hebben een nieuw kleinste_woord
+      # kleinste woord kan naar new_unsorted_array, en we hebben een nieuw kleinste_woord
       new_unsorted_array.push kleinste_woord
       kleinste_woord = unsorted_array[i]
     end
@@ -39,4 +39,4 @@ def recursive_sort unsorted_array, sorted_array
   return sorted_array
 end
 
-puts sort ['mies', 'noot', 'aap', 'wim', 'jet', 'klaas']
+puts sort ['Mies', 'noot', 'Aap', 'Wim', 'jet', 'klaas']
