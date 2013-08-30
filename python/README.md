@@ -12,3 +12,11 @@ Python programming FAQ: http://docs.python.org/3/faq/programming.html#faq-argume
 
 week 2: functions
 Python visualizer: http://pythontutor.com/visualize.html#
+
+design-recipe:
+* examples
+* type contract
+* header
+* description
+* body
+* test
