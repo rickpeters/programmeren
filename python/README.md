@@ -9,3 +9,6 @@ week 1: installatie en andere zaken
 
 Python handige locaties:
 Python programming FAQ: http://docs.python.org/3/faq/programming.html#faq-argument-vs-parameter
+
+week 2: functions
+Python visualizer: http://pythontutor.com/visualize.html#
