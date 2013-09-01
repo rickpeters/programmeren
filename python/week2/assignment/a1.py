@@ -16,6 +16,7 @@ def seconds_difference(time_1, time_2):
     
     return time_2 - time_1
 
+
 def hours_difference(time_1, time_2):
     """ (number, number) -> float
 
@@ -76,7 +77,6 @@ def to_24_hour_clock(hours):
     return hours % 24
 
 
-
 ### Write your get_hours function definition here:
 def get_hours(seconds):
     """ (int) -> int
@@ -96,6 +96,7 @@ def get_hours(seconds):
 
     return to_24_hour_clock(seconds // 3600)
 
+
 ### Write your get_minutes function definition here:
 def get_minutes(seconds):
     """ (int) -> int
@@ -111,11 +112,12 @@ def get_minutes(seconds):
     2
     >>> get_minutes(360)
     6
-    >> get_minutes(3599)
+    >>> get_minutes(3599)
     59
     """
 
-    return (seconds % (3600)) // 60
+    return (seconds % 3600) // 60
+
 
 ### Write your get_seconds function definition here:
 def get_seconds(seconds):
@@ -132,11 +134,12 @@ def get_seconds(seconds):
     8
     >>> get_seconds(369)
     9
-    >> get_seconds(3599)
+    >>> get_seconds(3599)
     59
     """
 
-    return (seconds % (3600)) % 60
+    return (seconds % 3600) % 60
+
 
 def time_to_utc(utc_offset, time):
     """ (number, float) -> float
@@ -185,5 +188,3 @@ def time_from_utc(utc_offset, time):
     """
 
     return to_24_hour_clock(time + utc_offset)
-
-
