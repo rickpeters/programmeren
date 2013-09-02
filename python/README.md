@@ -20,3 +20,10 @@ design-recipe:
 * description
 * body
 * test
+
+pycharm zaken:
+* working directory wordt niet geappend aan sys.path bij opstarten console
+* print (sys.path) laat dit zien
+* sys.path.append("/Users/rickpeters/Documents/programmeren/python/week2/assignment") lost dit op!
+* vervolgens moet je nog wel een 'import {module}' en/of een 'from {module} import *' doen
+* issue aangemaakt bij Jetbrains: Request #9772 "Python console : sys.path n..." created
