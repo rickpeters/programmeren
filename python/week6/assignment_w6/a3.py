@@ -21,7 +21,12 @@ def is_valid_word(wordlist, word):
 
     >>> is_valid_word(['ANT', 'BOX', 'SOB', 'TO'], 'TO')
     True
+    >>> is_valid_word(['ANT', 'BOX', 'SOB', 'TO'], 'LONG')
+    False
+    is_valid_word(['ANT', 'BOX', 'SOB', 'TO'], '')
+    False
     """
+    return word in wordlist
 
 
 def make_str_from_row(board, row_index):
@@ -32,8 +37,15 @@ def make_str_from_row(board, row_index):
 
     >>> make_str_from_row([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], 0)
     'ANTT'
+    >>> make_str_from_row([[]], 0)
+    ''
     """
 
+    row = ''
+    for i in range(len(board[row_index])):
+        row = row + board[row_index][i]
+
+    return row
 
 def make_str_from_column(board, column_index):
     """ (list of list of str, int) -> str
@@ -43,8 +55,15 @@ def make_str_from_column(board, column_index):
 
     >>> make_str_from_column([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], 1)
     'NS'
+    >>> make_str_from_column([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], 3)
+    'TB'
     """
 
+    column = ''
+    for i in range(len(board)):
+        column = column + board[i][column_index]
+
+    return column
 
 def board_contains_word_in_row(board, word):
     """ (list of list of str, str) -> bool
@@ -77,8 +96,15 @@ def board_contains_word_in_column(board, word):
 
     >>> board_contains_word_in_column([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], 'NO')
     False
+    >>> board_contains_word_in_column([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], 'TO')
+    True
     """
 
+    for column_index in range(len(board[0])):
+        if word in make_str_from_column(board, column_index):
+            return True
+
+    return False
 
 def board_contains_word(board, word):
     """ (list of list of str, str) -> bool
@@ -89,8 +115,19 @@ def board_contains_word(board, word):
 
     >>> board_contains_word([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], 'ANT')
     True
+    >>> board_contains_word([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], 'TO')
+    True
+    >>> board_contains_word([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], 'FROM')
+    False
+    >>> board_contains_word([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], '')
+    False
     """
 
+    # check whether word is not empty, because I miss the precondition word is a valid word
+    if word == '':
+        return False
+
+    return board_contains_word_in_row(board, word) or board_contains_word_in_column(board, word)
 
 def word_score(word):
     """ (str) -> int
@@ -104,8 +141,25 @@ def word_score(word):
 
     >>> word_score('DRUDGERY')
     16
+    >>> word_score('TO')
+    0
+    >>> word_score('FLUKE')
+    5
+    >>> word_score('FORCEFULLY')
+    30
     """
+    word_length = len(word)
 
+    if word_length < 3:
+        points = 0
+    elif word_length <= 6:
+        points = word_length
+    elif word_length <= 9:
+        points = word_length * 2
+    else:
+        points = word_length * 3
+
+    return points
 
 def update_score(player_info, word):
     """ ([str, int] list, str) -> NoneType
