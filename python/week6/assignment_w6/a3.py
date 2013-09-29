@@ -23,7 +23,7 @@ def is_valid_word(wordlist, word):
     True
     >>> is_valid_word(['ANT', 'BOX', 'SOB', 'TO'], 'LONG')
     False
-    is_valid_word(['ANT', 'BOX', 'SOB', 'TO'], '')
+    >>> is_valid_word(['ANT', 'BOX', 'SOB', 'TO'], '')
     False
     """
     return word in wordlist
@@ -169,7 +169,7 @@ def update_score(player_info, word):
 
     >>> update_score(['Jonathan', 4], 'ANT')
     """
-
+    player_info[1] = player_info[1] + word_score(word)
 
 def num_words_on_board(board, words):
     """ (list of list of str, list of str) -> int
@@ -178,8 +178,18 @@ def num_words_on_board(board, words):
 
     >>> num_words_on_board([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], ['ANT', 'BOX', 'SOB', 'TO'])
     3
+    >>> num_words_on_board([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], [''])
+    0
+    >>> num_words_on_board([['A', 'N', 'T', 'T'], ['X', 'S', 'O', 'B']], ['BOS'])
+    0
     """
+    num_on_board = 0
 
+    for word in words:
+        if board_contains_word(board, word):
+            num_on_board += 1
+
+    return num_on_board
 
 def read_words(words_file):
     """ (file open for reading) -> list of str
@@ -191,6 +201,11 @@ def read_words(words_file):
     from the standard English alphabet.
     """
 
+    words = []
+    for line in words_file:
+        words.append(line.strip())
+
+    return words
 
 def read_board(board_file):
     """ (file open for reading) -> list of list of str
@@ -198,4 +213,13 @@ def read_board(board_file):
     Return a board read from open file board_file. The board file will contain
     one row of the board per line. Newlines are not included in the board.
     """
+    board = []
+    for line in board_file:
+        row_list = []
+        # print(line)
+        word = line.strip()
+        for char in word:
+            row_list.append(char)
+        board.append(row_list)
 
+    return board
