@@ -6,12 +6,12 @@ Samen met Sander vanaf 19 augustus 2013
 Doel: ervaring opdoen met Python, een mooie algemene moderne webtaal
 
 ##week 1: installatie en andere zaken
-
 Python handige locaties:
 Python programming FAQ: http://docs.python.org/3/faq/programming.html#faq-argument-vs-parameter
+Python visualizer: http://pythontutor.com/visualize.html#
+Python Documentation: http://docs.python.org/3
 
 ##week 2: functions
-Python visualizer: http://pythontutor.com/visualize.html#
 
 Hoe bedien je de interactieve help functie
 **TODO**
@@ -57,6 +57,7 @@ deze als content root geopend. Buiten het specifieke project worden alle project
 
 week 3: boolean en if
 * boolean: `True` en `False`
+* operators en volgorde: ```not```, ```and```, ```or```
 * python syntax eigenschap, let op : aan einde regel voor markeren blok bij een if, elif en else
 ```python
 if change == True:
@@ -65,4 +66,5 @@ elif change == False:
     # block
 else:
     # block
-'''
+```
+
