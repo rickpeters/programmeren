@@ -11,6 +11,8 @@ Python programming FAQ: http://docs.python.org/3/faq/programming.html#faq-argume
 Python visualizer: http://pythontutor.com/visualize.html#
 Python Documentation: http://docs.python.org/3
 
+Python tutorial op Codecademy: http://www.codecademy.com/tracks/python
+
 ##week 2: functions
 
 Hoe bedien je de interactieve help functie
