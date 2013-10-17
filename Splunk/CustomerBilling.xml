@@ -54,7 +54,7 @@
 						<!-- selecteer periode -->
 						<module name="Search">
 							<param name="search">
-								index=summary-billing source="summary-billing plp daily" customer=$customer$ werkomgeving=$werkomgeving$ | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | fields jaarmaand | dedup jaarmaand | sort by jaarmaand asc
+								index=summary-billing source="summary-billing plp daily" | search customer=$customer$ werkomgeving=$werkomgeving$ | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | fields jaarmaand | dedup jaarmaand | sort by jaarmaand asc
 							</param>
 							<module name="Pulldown" layoutPanel="mainSearchControls">
 								<param name="name">jaarmaand</param>
@@ -76,7 +76,7 @@
 									<!-- buitenste query, summarize aantal dagen per maand, tov de andere velden -->
 									<module name="Search" autoRun="False" layoutPanel="panel_row1_col1">
 										<param name="search">
-											index=summary-billing source="summary-billing plp daily" customer=$customer$ werkomgeving=$werkomgeving$ | fields + datum, customer, pdc_naam, werkomgeving, type, hostdag | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | search jaarmaand=$jaarmaand$ | stats sum(hostdag) as hostdagen by jaarmaand, customer, pdc_naam, werkomgeving, type 
+											index=summary-billing source="summary-billing plp daily" | search customer=$customer$ werkomgeving=$werkomgeving$ | fields + datum, customer, pdc_naam, werkomgeving, type, hostdag | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | search jaarmaand=$jaarmaand$ | stats sum(hostdag) as hostdagen by jaarmaand, customer, pdc_naam, werkomgeving, type 
           							  	</param>
 										<!--  kan de jobprogress niet een stukje hoger? -->
 										<module name="JobProgressIndicator"/>
