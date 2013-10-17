@@ -1,0 +1,163 @@
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html">
+	<label>customer billing</label>
+	<!-- initialisatie dashboard -->
+	<module name="AccountBar" layoutPanel="appHeader"/>
+	<module name="AppBar" layoutPanel="appHeader"/>
+	<module name="SideviewUtils" layoutPanel="appHeader"/>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter">*</param>
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">1</param>
+	</module>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter">splunk.search.job</param>
+		<param name="clearOnJobDispatch">True</param>
+		<param name="maxSize">1</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<!-- einde initialisatie dashboard -->
+	<!-- start van hoofdsectie -->
+	<module name="URLLoader" layoutPanel="viewHeader" autoRun="True">
+		<!-- bepaal gebruikers selectie voor queries -->
+		<!-- selecteer customer -->
+		<module name="Search">
+			<param name="search">
+				| inputlookup hostApplication | fields customer |dedup customer|sort by customer asc
+			</param>
+			<module name="Pulldown" layoutPanel="mainSearchControls">
+				<param name="name">customer</param>
+				<param name="float">left</param>
+				<param name="label">customer</param>
+				<param name="searchFieldsToDisplay">
+					<list>
+						<param name="value">customer</param>
+						<param name="label">customer</param>
+					</list>
+				</param>
+				<!-- selecteer werkomgeving -->
+				<module name="Search">
+					<param name="search">
+						| inputlookup hostApplication |search customer=$customer$| fields werkomgeving |dedup werkomgeving|sort by werkomgeving asc
+					</param>
+					<module name="Pulldown" layoutPanel="mainSearchControls">
+						<param name="name">werkomgeving</param>
+						<param name="float">left</param>
+						<param name="label">werkomgeving</param>
+						<param name="searchFieldsToDisplay">
+							<list>
+								<param name="value">werkomgeving</param>
+								<param name="label">werkomgeving</param>
+							</list>
+						</param>
+						<!-- selecteer periode -->
+						<module name="Search">
+							<param name="search">
+								index=summary-billing source="summary-billing plp daily" customer=$customer$ werkomgeving=$werkomgeving$ | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | fields jaarmaand | dedup jaarmaand | sort by jaarmaand asc
+							</param>
+							<module name="Pulldown" layoutPanel="mainSearchControls">
+								<param name="name">jaarmaand</param>
+								<param name="float">left</param>
+								<param name="label">periode</param>
+								<param name="searchFieldsToDisplay">
+									<list>
+										<param name="value">jaarmaand</param>
+										<param name="label">jaarmaand</param>
+									</list>
+								</param>
+								<!-- Einde gebruikers selecties -->
+								<!-- nu het echte werk, de submit button start de queries met de gemaakte selecties -->
+								<module name="Button">
+									<param name="label">Submit</param>
+									<param name="allowSoftSubmit">False</param>
+									<param name="allowAutoSubmit">False</param>
+									<!-- Start presentatie resultaten -->
+									<!-- buitenste query, summarize aantal dagen per maand, tov de andere velden -->
+									<module name="Search" autoRun="False" layoutPanel="panel_row1_col1">
+										<param name="search">
+											index=summary-billing source="summary-billing plp daily" customer=$customer$ werkomgeving=$werkomgeving$ | fields + datum, customer, pdc_naam, werkomgeving, type, hostdag | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | search jaarmaand=$jaarmaand$ | stats sum(hostdag) as hostdagen by jaarmaand, customer, pdc_naam, werkomgeving, type 
+          							  	</param>
+										<!--  kan de jobprogress niet een stukje hoger? -->
+										<module name="JobProgressIndicator"/>
+										<!-- toon resultaten in een tabel met paginering -->
+										<module name="PostProcess" autoRun="True">
+											<param name="search">
+												| table jaarmaand, customer, pdc_naam, werkomgeving, type, hostdagen
+											</param>
+											<module name="Paginator">
+												<param name="count">20</param>
+												<param name="entityName">results</param>
+												<module name="EnablePreview">
+													<param name="enable">True</param>
+													<param name="display">False</param>
+													<module name="SimpleResultsTable">
+               									 	</module>
+												</module>
+											</module>
+										</module>
+
+
+										<!--
+										<module name="PostProcess" autoRun="True">
+											<param name="search">|stats sum(eval(image_size="small")) as total_small_images, sum(eval(image_size="large")) as total_large_images, sum(cost_month) as total_monthly_cost|eval total_images=(total_large_images + total_small_images)|table total_small_images total_large_images total_images total_monthly_cost </param>
+											<module name="SingleValue" layoutPanel="panel_row2_col1">
+												<param name="field">total_small_images</param>
+												<param name="format">count</param>
+												<param name="afterLabel">small images</param>
+											</module>
+											<module name="SingleValue" layoutPanel="panel_row2_col1">
+												<param name="field">total_large_images</param>
+												<param name="format">count</param>
+												<param name="afterLabel">large images</param>
+											</module>
+											<module name="SingleValue" layoutPanel="panel_row2_col2">
+												<param name="field">total_images</param>
+												<param name="format">count</param>
+												<param name="afterLabel">total images</param>
+											</module>
+											<module name="SingleValue" layoutPanel="panel_row2_col2">
+												<param name="field">total_monthly_cost</param>
+												<param name="format">count</param>
+												<param name="afterLabel">total cost to kadaster</param>
+											</module>
+										</module>
+										-->
+
+										
+										<!-- piechart met totalen per customer -->
+										<module name="HiddenPostProcess" layoutPanel="panel_row3_col1">
+											<param name="search">
+												chart sum(hostdagen) by customer
+											</param>
+											<module name="HiddenChartFormatter">
+												<param name="chartTitle">hostdagen per customer</param>
+												<param name="charting.chart">pie</param>
+												<module name="JSChart">
+													<param name="height">250px</param>
+												</module>
+											</module>
+										</module>
+										<!-- piechart met totalen per werkomgeving -->
+										<module name="HiddenPostProcess" layoutPanel="panel_row3_col2">
+											<param name="search">
+												chart sum(hostdagen) by werkomgeving
+											</param>
+											<module name="HiddenChartFormatter">
+												<param name="chartTitle">hostdagen per werkomgeving</param>
+												<param name="charting.chart">pie</param>
+												<module name="JSChart">
+													<param name="height">250px</param>
+												</module>
+											</module>
+										</module>
+									</module>
+								</module>
+							</module>
+						</module>
+					</module>
+				</module>
+			</module>
+		</module>
+	</module>
+</view>
