@@ -1,5 +1,6 @@
+<?xml version="1.0"?>
 <view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html">
-	<label>customer billing</label>
+	<label>PLP Afnemer Kosten Showback</label>
 	<!-- initialisatie dashboard -->
 	<module name="AccountBar" layoutPanel="appHeader"/>
 	<module name="AppBar" layoutPanel="appHeader"/>
@@ -24,9 +25,7 @@
 		<!-- selecteer customer -->
 		<module name="Search">
 			<param name="search">
-
 				| inputlookup hostApplication | fields customer |dedup customer|sort by customer asc
-
 			</param>
 			<module name="Pulldown" layoutPanel="mainSearchControls">
 				<param name="name">customer</param>
@@ -38,13 +37,28 @@
 						<param name="label">customer</param>
 					</list>
 				</param>
+				<!-- selecteer PDC dienst -->
+				<!-- werkt nog niet, summary-billing bevat geen pdc_naam
+				<module name="Search">
+					<param name="search">
+						index=summary-billing source="summary-billing plp daily" | fields pdc_naam | dedup pdc_naam | sort by pdc_naam asc
+					</param>
+					<module name="Pulldown" layoutPanel="mainSearchControls">
+						<param name="name">PDC dienst</param>
+						<param name="float">left</param>
+						<param name="label">PDC dienst</param>
+						<param name="searchFieldsToDisplay">
+							<list>
+								<param name="value">pdc_naam</param>
+								<param name="label">pdc_naam</param>
+							</list>
+						</param>
+				-->
 				<!-- selecteer werkomgeving -->
 				<module name="Search">
 					<param name="search">
-
-						| inputlookup hostApplication |search customer=$customer$| fields werkomgeving |dedup werkomgeving|sort by werkomgeving asc
-
-					</param>
+								| inputlookup hostApplication |search customer=$customer$| fields werkomgeving |dedup werkomgeving|sort by werkomgeving asc
+							</param>
 					<module name="Pulldown" layoutPanel="mainSearchControls">
 						<param name="name">werkomgeving</param>
 						<param name="float">left</param>
@@ -58,10 +72,8 @@
 						<!-- selecteer periode -->
 						<module name="Search">
 							<param name="search">
-
-								index=summary-billing source="summary-billing plp daily" | search customer=$customer$ werkomgeving=$werkomgeving$ | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | fields jaarmaand | dedup jaarmaand | sort by jaarmaand asc
-
-							</param>
+										index=summary-billing source="summary-billing plp daily" | search customer=$customer$ werkomgeving=$werkomgeving$ | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | fields jaarmaand | dedup jaarmaand | sort by jaarmaand asc
+									</param>
 							<module name="Pulldown" layoutPanel="mainSearchControls">
 								<param name="name">jaarmaand</param>
 								<param name="float">left</param>
@@ -81,38 +93,35 @@
 									<!-- Start presentatie resultaten -->
 									<!-- buitenste query, summarize aantal dagen per maand, tov de andere velden -->
 									<module name="Search" autoRun="False" layoutPanel="panel_row1_col1">
-										<param name="search"><![CDATA[
-
-											index=summary-billing source="summary-billing plp daily" | search customer=$customer$ werkomgeving=$werkomgeving$ | fields + datum, customer, pdc_naam, werkomgeving, type, hostdag | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | search jaarmaand=$jaarmaand$ | stats sum(hostdag) as hostdagen by jaarmaand, customer, pdc_naam, werkomgeving, type | rex field=type "C(?<vcpu>.*)M(?<vmem>.*)" | eval kosten=hostdagen*max(vcpu*7.5, vmem*2.34)
-
-           								]]></param>
 										<!--  kan de jobprogress niet een stukje hoger? -->
 										<module name="JobProgressIndicator"/>
+										<param name="search"><![CDATA[index=summary-billing source="summary-billing plp daily" | search customer=$customer$ werkomgeving=$werkomgeving$ | fields + datum, customer, pdc_naam, werkomgeving, type, hostdag | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | search jaarmaand=$jaarmaand$ | stats sum(hostdag) as hostdagen by jaarmaand, customer, pdc_naam, werkomgeving, type | rex field=type "C(?<vcpu>.*)M(?<vmem>.*)" | eval kosten=hostdagen*max(vcpu*7.5, vmem*2.34)]]></param>
 										<!-- toon resultaten in een tabel met paginering -->
 										<module name="PostProcess" autoRun="True">
 											<param name="search">
-
 												| table jaarmaand, customer, pdc_naam, werkomgeving, type, hostdagen, kosten
-
 											</param>
+											<module name="Export">
+												<param name="exportType">result</param>
+											</module>
 											<module name="Paginator">
-												<param name="count">20</param>
+												<param name="count">15</param>
 												<param name="entityName">results</param>
 												<module name="EnablePreview">
 													<param name="enable">True</param>
 													<param name="display">False</param>
-													<module name="SimpleResultsTable">
-
-               									 	</module>
+													<module name="SimpleResultsTable"/>
 												</module>
+											</module>
+											<module name="ResultsHeader">
+												<param name="entityLabel">resultaten</param>
+												<param name="entityName">results</param>
 											</module>
 										</module>
 										<module name="PostProcess" autoRun="True">
 											<param name="search">
-
-           									 |stats sum(kosten) as totale_kosten |table totale_kosten
-
-           							  		</param>
+														| stats sum(kosten) as totale_kosten |table totale_kosten
+													</param>
 											<module name="SingleValue" layoutPanel="panel_row2_col1">
 												<param name="field">totale_kosten</param>
 												<param name="format">count</param>
@@ -123,10 +132,8 @@
 										<!-- piechart met totalen per customer -->
 										<module name="HiddenPostProcess" layoutPanel="panel_row3_col1">
 											<param name="search">
-
-												chart sum(kosten) by customer
-
-											</param>
+														chart sum(kosten) by customer
+													</param>
 											<module name="HiddenChartFormatter">
 												<param name="chartTitle">kosten per customer</param>
 												<param name="charting.chart">pie</param>
@@ -138,10 +145,8 @@
 										<!-- piechart met totalen per werkomgeving -->
 										<module name="HiddenPostProcess" layoutPanel="panel_row3_col2">
 											<param name="search">
-
-												chart sum(kosten) by werkomgeving
-
-											</param>
+														chart sum(kosten) by werkomgeving
+													</param>
 											<module name="HiddenChartFormatter">
 												<param name="chartTitle">kosten per werkomgeving</param>
 												<param name="charting.chart">pie</param>
@@ -153,10 +158,8 @@
 										<!-- timechart ontwikkeling omgeving over tijd -->
 										<module name="HiddenPostProcess" layoutPanel="panel_row4_col1">
 											<param name="search">
-
-							              	  chart sum(kosten) over jaarmaand by werkomgeving
-
-							             	</param>
+														chart sum(kosten) over jaarmaand by werkomgeving
+													</param>
 											<module name="HiddenChartFormatter">
 												<param name="chartTitle">kosten per maand per werkomgeving</param>
 												<param name="charting.chart">column</param>
@@ -172,6 +175,10 @@
 						</module>
 					</module>
 				</module>
+				<!-- selectie van pdc_naam werkt nog niet
+					</module>
+				</module>
+				-->
 			</module>
 		</module>
 	</module>
