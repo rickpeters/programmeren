@@ -24,7 +24,9 @@
 		<!-- selecteer customer -->
 		<module name="Search">
 			<param name="search">
+
 				| inputlookup hostApplication | fields customer |dedup customer|sort by customer asc
+
 			</param>
 			<module name="Pulldown" layoutPanel="mainSearchControls">
 				<param name="name">customer</param>
@@ -39,7 +41,9 @@
 				<!-- selecteer werkomgeving -->
 				<module name="Search">
 					<param name="search">
+
 						| inputlookup hostApplication |search customer=$customer$| fields werkomgeving |dedup werkomgeving|sort by werkomgeving asc
+
 					</param>
 					<module name="Pulldown" layoutPanel="mainSearchControls">
 						<param name="name">werkomgeving</param>
@@ -54,7 +58,9 @@
 						<!-- selecteer periode -->
 						<module name="Search">
 							<param name="search">
+
 								index=summary-billing source="summary-billing plp daily" | search customer=$customer$ werkomgeving=$werkomgeving$ | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | fields jaarmaand | dedup jaarmaand | sort by jaarmaand asc
+
 							</param>
 							<module name="Pulldown" layoutPanel="mainSearchControls">
 								<param name="name">jaarmaand</param>
@@ -75,15 +81,19 @@
 									<!-- Start presentatie resultaten -->
 									<!-- buitenste query, summarize aantal dagen per maand, tov de andere velden -->
 									<module name="Search" autoRun="False" layoutPanel="panel_row1_col1">
-										<param name="search">
-											index=summary-billing source="summary-billing plp daily" | search customer=$customer$ werkomgeving=$werkomgeving$ | fields + datum, customer, pdc_naam, werkomgeving, type, hostdag | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | search jaarmaand=$jaarmaand$ | stats sum(hostdag) as hostdagen by jaarmaand, customer, pdc_naam, werkomgeving, type 
-          							  	</param>
+										<param name="search"><![CDATA[
+
+											index=summary-billing source="summary-billing plp daily" | search customer=$customer$ werkomgeving=$werkomgeving$ | fields + datum, customer, pdc_naam, werkomgeving, type, hostdag | eval jaarmaand=strftime(strptime(datum, "%F"),"%Y%m") | search jaarmaand=$jaarmaand$ | stats sum(hostdag) as hostdagen by jaarmaand, customer, pdc_naam, werkomgeving, type | rex field=type "C(?<vcpu>.*)M(?<vmem>.*)" | eval kosten=hostdagen*max(vcpu*7.5, vmem*2.34)
+
+           								]]></param>
 										<!--  kan de jobprogress niet een stukje hoger? -->
 										<module name="JobProgressIndicator"/>
 										<!-- toon resultaten in een tabel met paginering -->
 										<module name="PostProcess" autoRun="True">
 											<param name="search">
-												| table jaarmaand, customer, pdc_naam, werkomgeving, type, hostdagen
+
+												| table jaarmaand, customer, pdc_naam, werkomgeving, type, hostdagen, kosten
+
 											</param>
 											<module name="Paginator">
 												<param name="count">20</param>
@@ -92,46 +102,33 @@
 													<param name="enable">True</param>
 													<param name="display">False</param>
 													<module name="SimpleResultsTable">
+
                									 	</module>
 												</module>
 											</module>
 										</module>
-
-
-										<!--
 										<module name="PostProcess" autoRun="True">
-											<param name="search">|stats sum(eval(image_size="small")) as total_small_images, sum(eval(image_size="large")) as total_large_images, sum(cost_month) as total_monthly_cost|eval total_images=(total_large_images + total_small_images)|table total_small_images total_large_images total_images total_monthly_cost </param>
+											<param name="search">
+
+           									 |stats sum(kosten) as totale_kosten |table totale_kosten
+
+           							  		</param>
 											<module name="SingleValue" layoutPanel="panel_row2_col1">
-												<param name="field">total_small_images</param>
+												<param name="field">totale_kosten</param>
 												<param name="format">count</param>
-												<param name="afterLabel">small images</param>
-											</module>
-											<module name="SingleValue" layoutPanel="panel_row2_col1">
-												<param name="field">total_large_images</param>
-												<param name="format">count</param>
-												<param name="afterLabel">large images</param>
-											</module>
-											<module name="SingleValue" layoutPanel="panel_row2_col2">
-												<param name="field">total_images</param>
-												<param name="format">count</param>
-												<param name="afterLabel">total images</param>
-											</module>
-											<module name="SingleValue" layoutPanel="panel_row2_col2">
-												<param name="field">total_monthly_cost</param>
-												<param name="format">count</param>
-												<param name="afterLabel">total cost to kadaster</param>
+												<param name="beforeLabel">Totaal:</param>
+												<param name="afterLabel">Euro</param>
 											</module>
 										</module>
-										-->
-
-										
 										<!-- piechart met totalen per customer -->
 										<module name="HiddenPostProcess" layoutPanel="panel_row3_col1">
 											<param name="search">
-												chart sum(hostdagen) by customer
+
+												chart sum(kosten) by customer
+
 											</param>
 											<module name="HiddenChartFormatter">
-												<param name="chartTitle">hostdagen per customer</param>
+												<param name="chartTitle">kosten per customer</param>
 												<param name="charting.chart">pie</param>
 												<module name="JSChart">
 													<param name="height">250px</param>
@@ -141,11 +138,29 @@
 										<!-- piechart met totalen per werkomgeving -->
 										<module name="HiddenPostProcess" layoutPanel="panel_row3_col2">
 											<param name="search">
-												chart sum(hostdagen) by werkomgeving
+
+												chart sum(kosten) by werkomgeving
+
 											</param>
 											<module name="HiddenChartFormatter">
-												<param name="chartTitle">hostdagen per werkomgeving</param>
+												<param name="chartTitle">kosten per werkomgeving</param>
 												<param name="charting.chart">pie</param>
+												<module name="JSChart">
+													<param name="height">250px</param>
+												</module>
+											</module>
+										</module>
+										<!-- timechart ontwikkeling omgeving over tijd -->
+										<module name="HiddenPostProcess" layoutPanel="panel_row4_col1">
+											<param name="search">
+
+							              	  chart sum(kosten) over jaarmaand by werkomgeving
+
+							             	</param>
+											<module name="HiddenChartFormatter">
+												<param name="chartTitle">kosten per maand per werkomgeving</param>
+												<param name="charting.chart">column</param>
+												<param name="charting.chart.stackMode">stacked</param>
 												<module name="JSChart">
 													<param name="height">250px</param>
 												</module>
