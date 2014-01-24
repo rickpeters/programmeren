@@ -12,13 +12,13 @@ en is het dan nog steeds een magisch vierkant met het magisch getal 264
 positie = 1
 
 oplossing = [89, -1, -1, -1, -1,
-             -1, 61, -1, 86, -1,
+             -1, -1, -1, 86, -1,
              16, -1,  0, -1, -1,
-             -1, -1, 66, 18, -1,
+             -1, -1, 66, -1, -1,
              -1, 10, -1, -1, 96]
 
-getallen = [1, 6, 8, 9, 11, 19, 60, 68, 69, 80, 81, 88, 90, 91, 98, 99]
-pos_in_oplossing = [2, 3, 4, 5, 6, 8, 10, 12, 14, 15, 16, 17, 20, 21, 23, 24]
+getallen = [1, 6, 8, 9, 11, 18, 19, 60, 61, 68, 69, 80, 81, 88, 90, 91, 98, 99]
+pos_in_oplossing = [2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 15, 16, 17, 19, 20, 21, 23, 24]
 inverse = { 0:  0,  1: 10,  6: 90,  8: 80,  9: 60,
            10:  1, 11: 11, 16: 91, 18: 81, 19: 61,
            60:  9, 61: 19, 66: 99, 68: 89, 69: 69,
@@ -130,7 +130,7 @@ def check_solution (opl):
     if check_diag(rot180):
         # eindelijk een oplossing
         print('tatatataaaaaa: ' + str(opl))
-        print('tatatataaaaaa: ' + str(rot180))
+        #print('tatatataaaaaa: ' + str(rot180))
         for char in ['d', 'w', 'y', 'b', 'e', 'a', 'v', 'g', 'x']:
             print(char + ': ' + str(opl[cw[char]]))
         print('N52 ' + str(opl[cw['x']] + opl[cw['y']]) + '.' + str((opl[cw['a']]*opl[cw['b']]+opl[cw['w']]+93)))
