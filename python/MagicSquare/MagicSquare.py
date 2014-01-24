@@ -7,6 +7,7 @@ Verder kan het vierkant 180 graden gedraaid worden waarbij de getallen omgekeerd
 en is het dan nog steeds een magisch vierkant met het magisch getal 264
 
 """
+import time
 
 # globals
 positie = 1
@@ -129,14 +130,40 @@ def check_solution (opl):
 
     if check_diag(rot180):
         # eindelijk een oplossing
-        print('tatatataaaaaa: ' + str(opl))
-        #print('tatatataaaaaa: ' + str(rot180))
+        print_time()
+        print('Goede oplossing: ')
+        print_square(opl)
+        print('Geroteerd: ')
+        print_square(rot180)
+
         for char in ['d', 'w', 'y', 'b', 'e', 'a', 'v', 'g', 'x']:
-            print(char + ': ' + str(opl[cw[char]]))
-        print('N52 ' + str(opl[cw['x']] + opl[cw['y']]) + '.' + str((opl[cw['a']]*opl[cw['b']]+opl[cw['w']]+93)))
+            print(char + ': ' + str(opl[cw[char]]), end=', ')
+        print()
+
+        print('N52 ' + str(opl[cw['x']] + opl[cw['y']]) + '.' + str((opl[cw['a']]*opl[cw['b']]+opl[cw['w']]+93)), end=' ')
         print('E5 ' + str(59 - opl[cw['v']]) + '.' + str(opl[cw['d']] * opl[cw['e']] + opl[cw['g']]))
 
+def print_square(square):
+    """ (list of int) -> None
 
+    print het vierkant square netjes als een vierkant van 5 x 5
+    """
+    for row in range(5):
+        for col in range(5):
+            print(str(square[row * 5 + col]).rjust(3), end='')
+        print('')
+
+def print_time():
+    """ () -> None
+
+    print de verstreken tijd sinds vorige meetpunt en pas meetpunt aan
+    """
+    global meetpunt
+
+    nwpunt = time.perf_counter()
+
+    print('seconden: %f8' % (nwpunt - meetpunt))
+    meetpunt = nwpunt
 
 def mag_square( positie, oplossing, getallen):
     """ (int, list of int, list of int) -> bool
@@ -168,14 +195,17 @@ def mag_square( positie, oplossing, getallen):
 
         ga_verder = True
 
-        if 21 <= pos <= 23:
-            # controleer kolomtotaal
-            if sum_col(pos - 20, nw_opl) != 264:
-                # we gaan verder
+        if pos == 21:
+            # controleer kolom 1 en 2 (omdat positie 22 al bepaald is)
+            if (sum_col(1, nw_opl) != 264) or (sum_col(2, nw_opl) != 264):
+                # we gaan niet verder
                 ga_verder = False
             #else:
                 # tussenresultaat
                 #print('positie: ' + str(pos) + ', partieel: ' + str(nw_opl))
+        elif pos == 23:
+            if (sum_col(3, nw_opl) != 264):
+                ga_verder = False
         elif pos == 24:
             # dit is de 1-na-laatste kolom, aangezien
             # positie 5, 5 bekend is moeten we nu kolom 4 en 5 checken voor een eindoplossing
@@ -189,7 +219,7 @@ def mag_square( positie, oplossing, getallen):
         elif pos % 5 == 0:
             # controleer rijtotaal
             if sum_row( pos // 5, nw_opl) != 264:
-                # we gaan verder
+                # we gaan niet verder
                 ga_verder = False
             #else:
                 # tussenresultaat
@@ -210,6 +240,10 @@ def mag_square( positie, oplossing, getallen):
 #print(pos_in_oplossing)
 #print(len(pos_in_oplossing))
 # en nu gaat het beginnen
+#print_square(oplossing)
 
+# bepaal startpunt zodat de tijd voor oplossen bepaald kan worden
+meetpunt = time.perf_counter()
 mag_square(positie, oplossing, getallen)
+print_time()
 
