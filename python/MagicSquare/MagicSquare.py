@@ -257,6 +257,6 @@ print('aantal pogingen     : ' + str(teller))
 print('aantal afgewezen    : ' + str(afgewezen))
 print('pogingen bespaard   : ' + str(math.factorial(18) - teller))
 print('totale tijd         : %0.1f' % doorloop)
-print('pogingen per seconde: %0.2f' % (doorloop / teller) )
+print('pogingen per seconde: %0.2f' % (teller / doorloop) )
 
 
