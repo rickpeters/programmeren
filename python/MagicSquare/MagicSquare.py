@@ -8,9 +8,13 @@ en is het dan nog steeds een magisch vierkant met het magisch getal 264
 
 """
 import time
+import math
 
 # globals
 positie = 1
+teller = 0
+afgewezen = 0
+doorloop = 0
 
 oplossing = [89, -1, -1, -1, -1,
              -1, -1, -1, 86, -1,
@@ -158,11 +162,12 @@ def print_time():
 
     print de verstreken tijd sinds vorige meetpunt en pas meetpunt aan
     """
-    global meetpunt
+    global meetpunt, doorloop
 
     nwpunt = time.perf_counter()
 
-    print('seconden: %f8' % (nwpunt - meetpunt))
+    print('seconden            : %0.1f' % (nwpunt - meetpunt))
+    doorloop += (nwpunt - meetpunt)
     meetpunt = nwpunt
 
 def mag_square( positie, oplossing, getallen):
@@ -177,7 +182,7 @@ def mag_square( positie, oplossing, getallen):
     Als op de laatste positie een geldige oplossing is bepaald dan wordt deze afgedrukt (en True teruggegeven)
 
     """
-    #global pos_in_oplossing
+    global teller, afgewezen
 
     #print('positie: ' + str(positie))
 
@@ -185,11 +190,9 @@ def mag_square( positie, oplossing, getallen):
         nw_opl = oplossing.copy()
         nw_get = getallen.copy()
 
-        #print('index: ' + str(i))
+        teller += 1
 
-        #print(pos_in_oplossing)
         pos = pos_in_oplossing[positie-1]
-        #print('positie: ' + str(pos))
 
         nw_opl[pos-1] = nw_get[i]
 
@@ -231,6 +234,9 @@ def mag_square( positie, oplossing, getallen):
             # nu een positie verder recursieve aanroep
             if len(nw_get) > 0:
                 mag_square ( positie + 1, nw_opl, nw_get)
+        else:
+            afgewezen += 1
+
 
 
 #print('oplossing : ' + str(oplossing))
@@ -243,7 +249,14 @@ def mag_square( positie, oplossing, getallen):
 #print_square(oplossing)
 
 # bepaal startpunt zodat de tijd voor oplossen bepaald kan worden
+print('bezig met bepalen mogelijke oplossingen...')
 meetpunt = time.perf_counter()
 mag_square(positie, oplossing, getallen)
 print_time()
+print('aantal pogingen     : ' + str(teller))
+print('aantal afgewezen    : ' + str(afgewezen))
+print('pogingen bespaard   : ' + str(math.factorial(18) - teller))
+print('totale tijd         : %0.1f' % doorloop)
+print('pogingen per seconde: %0.2f' % (doorloop / teller) )
+
 
