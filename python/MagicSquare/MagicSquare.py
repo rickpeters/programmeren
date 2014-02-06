@@ -9,12 +9,14 @@ en is het dan nog steeds een magisch vierkant met het magisch getal 264
 """
 import time
 import math
+import sys
 
 # globals
 positie = 1
 teller = 0
 afgewezen = 0
 doorloop = 0
+mogelijkheden = math.factorial(18)
 
 oplossing = [89, -1, -1, -1, -1,
              -1, -1, -1, 86, -1,
@@ -135,7 +137,7 @@ def check_solution (opl):
     if check_diag(rot180):
         # eindelijk een oplossing
         print_time()
-        print('Goede oplossing: ')
+        print('Goede oplossing: ' + str(teller))
         print_square(opl)
         print('Geroteerd: ')
         print_square(rot180)
@@ -191,6 +193,12 @@ def mag_square( positie, oplossing, getallen):
         nw_get = getallen.copy()
 
         teller += 1
+        # laat een soort van voortgang zien, elke 10 miljoen een .
+        if (teller % 1000000) == 0:
+            sys.stdout.write('\r')
+            # the exact output you're looking for:
+            sys.stdout.write("%d miljoen getallen geprobeerd " % (teller / 1000000))
+            sys.stdout.flush()
 
         pos = pos_in_oplossing[positie-1]
 
@@ -236,8 +244,6 @@ def mag_square( positie, oplossing, getallen):
                 mag_square ( positie + 1, nw_opl, nw_get)
         else:
             afgewezen += 1
-
-
 
 #print('oplossing : ' + str(oplossing))
 #print('getallen  : ' + str(getallen))
