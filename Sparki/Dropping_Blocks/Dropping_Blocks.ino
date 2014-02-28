@@ -139,7 +139,7 @@ void findLoop()
     
   }
   sparki.updateLCD();
-  delay(5000); // wait 5 seconds
+  //delay(5000); // wait 5 seconds
 }
 
 void loop() {
@@ -220,17 +220,21 @@ void goRandom()
 {
   float step = 0.2;
   int angle = random(0,360);
-  int distance = random(5,50);
+  int distance = random(5000,15000); // time to travel
+  int curtime = millis();
   
+  sparki.RGB(60, 100, 0); // should be RGB_YELLOW in the future
   sparki.moveRight(angle * ANGLE_ADJUST);
-  // create a loop to move a certain distance and prevent falling off
+  // create a loop to move a certain time and prevent falling off
   // the edge
-  for (traveled = 0; traveled <= distance; traveled += step)
-  {
-    sparki.moveForward(step);
-    edgeAvoidance();
-  }
-  
+  sparki.moveForward();
+  while ((millis() - curtime) < distance)
+    {
+      EdgeAvoidance();
+      delay(100);
+    }
+  sparki.moveStop();
+  sparki.RGB(RGB_OFF);
 }
 
 // go somewhere random, drop whatever is being held
@@ -245,7 +249,7 @@ void goRandomAndDrop()
   
     // open gripper
     sparki.gripperOpen();
-    delay(8000);
+    delay(4000);
     sparki.gripperStop();
     sparki.RGB(0,0,0);
 
