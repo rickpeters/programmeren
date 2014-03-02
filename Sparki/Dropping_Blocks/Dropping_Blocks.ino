@@ -13,23 +13,6 @@
 
 #include <Sparki.h> // include the sparki library
 
-// set these constants to 1 once Angles and Distances are 1 to 1
-//const float ANGLE_ADJUST =  1.9584;
-const float ANGLE_ADJUST =  1.0;
-//const float DISTANCE_ADJUST = 1.9584;
-const float DISTANCE_ADJUST = 1.1;
-const int SEARCH_DISTANCE = 30; // 30 cm radius
-bool doMove = false;
-
-void setup()
-{       
-  sparki.servo(SERVO_CENTER); // center the servo
-  // open gripper
-  sparki.gripperOpen();
-  delay(5000);
-  sparki.gripperStop();
-}
-
 // constants and initialization
 const int NONE  = 0;
 const int LEFT  = 1;
@@ -41,51 +24,55 @@ const int EDGE_BACK = 2;
 int edge = NONE;
 int program = false;
 
-// helper functions
-void EdgeAvoidance() {
-  // edge avoidance
-  int edgeLeft   = sparki.edgeLeft();   // measure the left edge IR sensor
-  int edgeRight  = sparki.edgeRight();  // measure the right edge IR sensor
+// set these constants to 1 once Angles and Distances are 1 to 1
+//const float ANGLE_ADJUST =  1.9584;
+const float ANGLE_ADJUST =  1.0;
+//const float DISTANCE_ADJUST = 1.9584;
+const float DISTANCE_ADJUST = 1.1;
+const int SEARCH_DISTANCE = 30; // 30 cm radius
+bool doMove = false;
 
-  int threshold = 200; // if below this value, no surface underneath
-
-  if (edgeLeft < threshold) // if no surface underneath left sensor
-  {
-    edge = LEFT;
-    sparki.RGB(RGB_BLUE); // turn the led blue
-    sparki.moveBackward(EDGE_BACK); // move back a bit
-    sparki.moveRight(EDGE_TURN); // turn right
-  }
-
-  if (edgeRight < threshold) // if no surface underneath right sensor
-  {
-    edge = RIGHT;
-    sparki.RGB(RGB_BLUE); // turn the led blue
-    sparki.moveBackward(2); // move back a bit
-    sparki.moveLeft(EDGE_TURN); // turn left
-  }
+void setup()
+{  
+  Debug("versie 1.1");  
+  sparki.servo(SERVO_CENTER); // center the servo
+  // open gripper
+  sparki.gripperOpen();
+  delay(5000);
+  sparki.gripperStop();
 }
 
-void WallAvoidance() {
-  // wall avoidance
-  int cm = sparki.ping(); // measures the distance with Sparki's eyes
+void loop() {
 
-  if(cm != -1) // make sure its not too close or too far
-  { 
-    if(cm < 20) // if the distance measured is less than 20 centimeters
-    {
-      sparki.RGB(RGB_RED); // turn the led red
-      sparki.beep(); // beep!
-      sparki.moveBackward(WALL_BACK); // move sparki backwards
-      if (edge == RIGHT)
-      {
-        sparki.moveLeft(WALL_TURN);
-      }
-      else
-      {
-        sparki.moveRight(WALL_TURN);
-      }
-    }
+  //Scan for IR Receiver
+  int code = sparki.readIR();
+
+  // /------^-----\
+  // |            |
+  // | 69  70  71 |
+  // | 68  64  67 |
+  // |  7  21   9 |
+  // | 22  25  13 |
+  // | 12  24  94 |
+  // |  8  28  90 |
+  // | 66  82  74 |
+  // \____________/
+
+  switch(code){
+    // Program Control
+  case 64:  
+    sparki.moveStop();
+    sparki.RGB(0,0,0);
+    program = false; 
+    break;
+  case 70:  
+    program = true; 
+    break;
+  }  
+
+  // Run Autonomy Code if
+  if(program == true){
+    findLoop();
   }
 }
 
@@ -126,11 +113,13 @@ void findLoop()
     if(doMove)
     {
       // either move in a random direction
+      Debug("goRandom");
       goRandom();
     }
     else    
     {
       // or turn around
+      Debug("Turn around");
       sparki.moveRight(180 * ANGLE_ADJUST);
     }
     
@@ -140,40 +129,6 @@ void findLoop()
   }
   sparki.updateLCD();
   //delay(5000); // wait 5 seconds
-}
-
-void loop() {
-
-  //Scan for IR Receiver
-  int code = sparki.readIR();
-
-  // /------^-----\
-  // |            |
-  // | 69  70  71 |
-  // | 68  64  67 |
-  // |  7  21   9 |
-  // | 22  25  13 |
-  // | 12  24  94 |
-  // |  8  28  90 |
-  // | 66  82  74 |
-  // \____________/
-
-  switch(code){
-    // Program Control
-  case 64:  
-    sparki.moveStop();
-    sparki.RGB(0,0,0);
-    program = false; 
-    break;
-  case 70:  
-    program = true; 
-    break;
-  }  
-
-  // Run Autonomy Code if
-  if(program == true){
-    findLoop();
-  }
 }
 
 // move to target directly ahead, can pass adjustment so only move 50% of distance or 100% etc.
@@ -214,14 +169,21 @@ bool turnToTarget()
   return false;
 }
 
-
+// helper functions
 // move in a random direction
 void goRandom()
 {
   float step = 0.2;
-  int angle = random(0,360);
-  int distance = random(5000,15000); // time to travel
-  int curtime = millis();
+  // int angle = random(0,360);
+  int angle = 180; // since we just looked in one direction, it is better to just turn around
+  long distance = random(5000,15000); // time to travel
+  long curtime = 0;
+  
+  // set current time
+  curtime = millis();
+  
+  Debug("distance: " + String(distance));
+  Debug("curtime: " + String(curtime));
   
   sparki.RGB(60, 100, 0); // should be RGB_YELLOW in the future
   sparki.moveRight(angle * ANGLE_ADJUST);
@@ -230,6 +192,7 @@ void goRandom()
   sparki.moveForward();
   while ((millis() - curtime) < distance)
     {
+      Debug("loop");
       EdgeAvoidance();
       delay(100);
     }
@@ -305,4 +268,60 @@ int FindTarget()
   
 
    return angle;      
+}
+
+void Debug(String text)
+{
+  if (text != "")
+  {
+    sparki.println(text);
+    sparki.updateLCD();
+  }
+}
+
+void EdgeAvoidance() {
+  // edge avoidance
+  int edgeLeft   = sparki.edgeLeft();   // measure the left edge IR sensor
+  int edgeRight  = sparki.edgeRight();  // measure the right edge IR sensor
+
+  int threshold = 200; // if below this value, no surface underneath
+
+  if (edgeLeft < threshold) // if no surface underneath left sensor
+  {
+    edge = LEFT;
+    sparki.RGB(RGB_BLUE); // turn the led blue
+    sparki.moveBackward(EDGE_BACK); // move back a bit
+    sparki.moveRight(EDGE_TURN); // turn right
+  }
+
+  if (edgeRight < threshold) // if no surface underneath right sensor
+  {
+    edge = RIGHT;
+    sparki.RGB(RGB_BLUE); // turn the led blue
+    sparki.moveBackward(2); // move back a bit
+    sparki.moveLeft(EDGE_TURN); // turn left
+  }
+}
+
+void WallAvoidance() {
+  // wall avoidance
+  int cm = sparki.ping(); // measures the distance with Sparki's eyes
+
+  if(cm != -1) // make sure its not too close or too far
+  { 
+    if(cm < 20) // if the distance measured is less than 20 centimeters
+    {
+      sparki.RGB(RGB_RED); // turn the led red
+      sparki.beep(); // beep!
+      sparki.moveBackward(WALL_BACK); // move sparki backwards
+      if (edge == RIGHT)
+      {
+        sparki.moveLeft(WALL_TURN);
+      }
+      else
+      {
+        sparki.moveRight(WALL_TURN);
+      }
+    }
+  }
 }
